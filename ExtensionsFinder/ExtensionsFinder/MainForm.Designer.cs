@@ -37,7 +37,7 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.showExtentionsDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showExtensionsDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FileInfoViewer = new System.Windows.Forms.RichTextBox();
@@ -129,18 +129,18 @@
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showExtentionsDatabaseToolStripMenuItem});
+            this.showExtensionsDatabaseToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.editToolStripMenuItem.Text = "Edit";
             // 
-            // showExtentionsDatabaseToolStripMenuItem
+            // showExtensionsDatabaseToolStripMenuItem
             // 
-            this.showExtentionsDatabaseToolStripMenuItem.Name = "showExtentionsDatabaseToolStripMenuItem";
-            this.showExtentionsDatabaseToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.showExtentionsDatabaseToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
-            this.showExtentionsDatabaseToolStripMenuItem.Text = "Show Extensions Database";
-            this.showExtentionsDatabaseToolStripMenuItem.Click += new System.EventHandler(this.showExtentionsDatabaseToolStripMenuItem_Click);
+            this.showExtensionsDatabaseToolStripMenuItem.Name = "showExtensionsDatabaseToolStripMenuItem";
+            this.showExtensionsDatabaseToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
+            this.showExtensionsDatabaseToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
+            this.showExtensionsDatabaseToolStripMenuItem.Text = "Show Extensions Database";
+            this.showExtensionsDatabaseToolStripMenuItem.Click += new System.EventHandler(this.showExtensionsDatabaseToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
@@ -225,7 +225,7 @@
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem showExtentionsDatabaseToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showExtensionsDatabaseToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.RichTextBox FileInfoViewer;

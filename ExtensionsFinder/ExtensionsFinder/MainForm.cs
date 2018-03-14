@@ -18,7 +18,7 @@ namespace ExtensionsFinder
 
         private FolderBrowserDialog FolderBrowser = null;
         private ExtensionFinder Finder = null;
-        private List<Dictionary<string, string>> ExtensionsList = null;
+        private List<KeyValuePair<string, List<string>>> MultipleExtensionsList = null;
         private List<string> NullExtensionsList = null;
 
         private string _ExtensionsDataBaseFile = null;
@@ -37,33 +37,50 @@ namespace ExtensionsFinder
                 Description =
                 "Select the directory that you want to use.",
             };
-            
+
         }
-      
+
         private void MainForm_Load(object sender, EventArgs e)
         {
-            ExtensionsDataBaseFile = Path.Combine(Application.StartupPath, "Content", "FilesExtensionsDatabase.txt");
-            Finder = new ExtensionFinder(ExtensionsDataBaseFile);
             IdentifyButton.Enabled = false;
             OpenSelectedFolder.Enabled = false;
+            openToolStripMenuItem.Enabled = false;
+            showExtensionsDatabaseToolStripMenuItem.Enabled = false;
+            FolderButton.Enabled = false;
+            ExtensionsDataBaseFile = Path.Combine(Application.StartupPath, "Content", "FilesExtensionsDatabase.txt");
+            try
+            {
+                Finder = new ExtensionFinder(ExtensionsDataBaseFile);
+                FolderButton.Enabled = true;
+                openToolStripMenuItem.Enabled = true;
+                showExtensionsDatabaseToolStripMenuItem.Enabled = true;
+
+            }
+            catch (Exception Ex)
+            {
+                MessageBox.Show(Ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
         }
 
         private void IdentifyButton_Click(object sender, EventArgs e)
         {
-            ExtensionsList = new List<Dictionary<string, string>>();
+            MultipleExtensionsList = new List<KeyValuePair<string, List<string>>>();
             NullExtensionsList = new List<string>();
 
             foreach (var Item in FilesListBox.Items)
             {
                 string FileWithoutExtension = Path.Combine(FolderBrowser.SelectedPath, Item.ToString());
                 var Extension = IdentifyFileExtension(Item, FileWithoutExtension);
-                if (Extension.Count > 0)
+                if (Extension.Value.Count > 0)
                 {
-                    if (Extension.Count > 1)
-                        ExtensionsList.Add(Extension);
+                    if (Extension.Value.Count > 1)
+                        MultipleExtensionsList.Add(Extension);
                     else
                     {
-                        File.Move(FileWithoutExtension, Path.ChangeExtension(FileWithoutExtension, Extension.First().Value));
+                        File.Move(FileWithoutExtension,
+                            Path.ChangeExtension(FileWithoutExtension, Extension.Value.First()));
                     }
                 }
                 else
@@ -72,15 +89,18 @@ namespace ExtensionsFinder
 
             FillFilesList();
 
-            if (ExtensionsList.Count >= 1 || NullExtensionsList.Count >= 1)
-                ProcessSuggestions(ExtensionsList);
+            if (MultipleExtensionsList.Count >= 1 || NullExtensionsList.Count >= 1)
+                ProcessSuggestions();
         }
 
         private void FolderButton_Click(object sender, EventArgs e)
         {
             DialogResult result = FolderBrowser.ShowDialog();
-            if(result == DialogResult.OK)
+            if (result == DialogResult.OK)
             {
+                IdentifyButton.Enabled = true;
+                OpenSelectedFolder.Enabled = true;
+
                 FillFilesList();
             }
         }
@@ -94,7 +114,7 @@ namespace ExtensionsFinder
         }
 
         //process suggested extensions for files which have multiple extension byte signature 
-        private void ProcessSuggestions(List<Dictionary<string, string>> MultipleExtensionsList)
+        private void ProcessSuggestions()
         {
             string OutputLogString = null;
             OutputLogString = "Some files has been marked as \"unresolved\" because each of them have no extension signature" +
@@ -116,34 +136,41 @@ namespace ExtensionsFinder
             if (MultipleExtensionsList.Count > 0)
             {
                 OutputLogString += "Multiple extension signatures found for files: " + Environment.NewLine;
-                foreach (var ExtentionsList in MultipleExtensionsList)
+                foreach (var ExtensionsList in MultipleExtensionsList)
                 {
-                    if (ExtensionsList != null)
-                        foreach (var Item in ExtentionsList)
+                    OutputLogString += "\t" + FolderBrowser.SelectedPath + "\\" +
+                               ExtensionsList.Key + " | Suggested extension: ";
+                    if (ExtensionsList.Value != null)
+                        foreach (var Item in ExtensionsList.Value)
                         {
-                            OutputLogString += "\t" + FolderBrowser.SelectedPath + "\\\\" +
-                                Item.Key + " | Suggested extension: " + Item.Value + Environment.NewLine;
-
+                            OutputLogString += Item + " ";
                         }
+                    OutputLogString += Environment.NewLine;
                 }
-                OutputLogString += "\nYou can manualy change file extension with suggested one to see which of are suitable.";
+                OutputLogString += Environment.NewLine
+                    + "You can manually change file extension with suggested one to see which of are suitable.";
             }
 
             OutputLogString += Environment.NewLine + "List of extension signatures located here: " + ExtensionsDataBaseFile;
             string OutputLogFilePath = Path.Combine(Application.StartupPath, "ErrorLog.txt");
             File.WriteAllText(OutputLogFilePath, OutputLogString);
 
-            DialogResult Result = MessageBox.Show("Errors occured while indentify files extensions. Open Error log?", "Error", 
+            DialogResult Result = MessageBox.Show("Errors occured while indentify files extensions. Open Error log?", "Error",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Error);
-            if(Result == DialogResult.Yes)
+            if (Result == DialogResult.Yes)
             {
                 System.Diagnostics.Process.Start("notepad.exe", OutputLogFilePath);
             }
         }
 
-        private Dictionary<string, string> IdentifyFileExtension(object Item, string FileWithoutExtension)
+        private KeyValuePair<string, List<string>> IdentifyFileExtension(object Item, string FileWithoutExtension)
         {
-            var Extension = Finder.FindExtensionForFile(FileWithoutExtension);
+            KeyValuePair<string, List<string>> Extension = new KeyValuePair<string, List<string>>();
+            if (Finder != null)
+            {
+                Extension = Finder.FindExtensionForFile(FileWithoutExtension);
+                return Extension;
+            }
             return Extension;
         }
 
@@ -189,7 +216,6 @@ namespace ExtensionsFinder
             FileInfoViewer.Text += "Attributes: " + Info.Attributes + "\n";
             FileInfoViewer.Text += "Creation Time: " + Info.CreationTime + "\n";
             FileInfoViewer.Text += "Directory: " + Info.DirectoryName + "\n";
-            FileInfoViewer.Text += "Extension: " + Info.Extension + "\n";
             FileInfoViewer.Text += "Is Read Only: " + (Info.IsReadOnly ? "True" : "False") + "\n";
             FileInfoViewer.Text += "Last Access Time: " + Info.LastAccessTime + "\n";
             FileInfoViewer.Text += "Last Write Time: " + Info.LastWriteTime + "\n";
@@ -210,7 +236,7 @@ namespace ExtensionsFinder
             Application.Exit();
         }
 
-        private void showExtentionsDatabaseToolStripMenuItem_Click(object sender, EventArgs e)
+        private void showExtensionsDatabaseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("notepad.exe", ExtensionsDataBaseFile);
         }
@@ -222,7 +248,7 @@ namespace ExtensionsFinder
 
         private void OpenSelectedFolder_Click(object sender, EventArgs e)
         {
-            if(FolderBrowser.SelectedPath.Length > 0)
+            if (FolderBrowser.SelectedPath.Length > 0)
             {
                 System.Diagnostics.Process.Start(FolderBrowser.SelectedPath);
             }
